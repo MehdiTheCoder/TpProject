@@ -3,77 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do List</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>TaskFlow Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2196F3;
+            --secondary-color: #FFC107;
+            --success-color: #4CAF50;
+            --danger-color: #F44336;
+            --dark-color: #333;
+            --light-color: #f4f4f4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--light-color);
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .task-controls {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1rem;
+        }
+
+        .task-input-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        input, select, button {
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .task-list {
+            padding: 1rem;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .priority-high { border-left: 4px solid var(--danger-color); }
+        .priority-medium { border-left: 4px solid var(--secondary-color); }
+        .priority-low { border-left: 4px solid var(--success-color); }
+
+        .filters {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--light-color);
+        }
+
+        .task-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .completed {
+            opacity: 0.7;
+            text-decoration: line-through;
+        }
+
+        @media (max-width: 768px) {
+            .task-controls {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center min-h-screen">
-    <div class="container mx-auto p-6 bg-white rounded-lg shadow-2xl">
-        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">To-Do List</h2>
-        <div class="flex mb-6">
-            <input type="text" id="taskInput" class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter a task">
-            <button onclick="addTask()" class="bg-blue-600 text-white px-6 py-3 rounded-r-lg hover:bg-blue-700">Add</button>
-            <button onclick="clearAllTasks()" class="bg-red-600 text-white px-6 py-3 rounded-lg ml-4 hover:bg-red-700">Clear All</button>
+<body>
+    <div class="container">
+        <header class="app-header">
+            <h1><i class="fas fa-check-double"></i> TaskFlow Pro</h1>
+        </header>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <h3>Total Tasks</h3>
+                <p id="totalTasks">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Completed</h3>
+                <p id="completedTasks">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending</h3>
+                <p id="pendingTasks">0</p>
+            </div>
         </div>
-        <ul id="taskList" class="list-none p-0 mb-6"></ul>
-        <div class="bg-gray-100 p-4 rounded-lg shadow-inner overflow-y-auto h-40">
-            <h3 class="text-xl font-bold mb-4 text-center text-gray-700">Task History</h3>
-            <ul id="taskHistory" class="list-none p-0"></ul>
+
+        <div class="task-controls">
+            <div class="task-input-group">
+                <input type="text" id="taskInput" placeholder="Add a new task">
+                <input type="date" id="dueDate">
+                <select id="priority">
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <button class="btn-primary" onclick="addTask()">
+                    <i class="fas fa-plus"></i> Add Task
+                </button>
+            </div>
+            <div class="task-search">
+                <input type="text" id="searchTask" placeholder="Search tasks...">
+            </div>
         </div>
+
+        <div class="filters">
+            <button onclick="filterTasks('all')">All</button>
+            <button onclick="filterTasks('active')">Active</button>
+            <button onclick="filterTasks('completed')">Completed</button>
+            <select onchange="sortTasks(this.value)">
+                <option value="date">Sort by Date</option>
+                <option value="priority">Sort by Priority</option>
+            </select>
+        </div>
+
+        <div class="task-list" id="taskList"></div>
     </div>
+
     <script>
+        let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+
+        function updateStats() {
+            const completed = tasks.filter(task => task.completed).length;
+            document.getElementById('totalTasks').textContent = tasks.length;
+            document.getElementById('completedTasks').textContent = completed;
+            document.getElementById('pendingTasks').textContent = tasks.length - completed;
+        }
+
         function addTask() {
-            let taskInput = document.getElementById("taskInput");
-            let taskList = document.getElementById("taskList");
-            let taskText = taskInput.value.trim();
-            if (taskText !== "") {
-                let li = document.createElement("li");
-                li.classList.add("flex", "justify-between", "items-center", "bg-gray-200", "p-3", "mb-2", "rounded-lg", "shadow-sm");
-                li.innerHTML = `
-                    <span class="flex-grow">${taskText}</span>
-                    <div class="flex space-x-2">
-                        <button class="done-btn bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600" onclick="markDone(this)">✔</button>
-                        <button class="edit-btn bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600" onclick="editTask(this)">✏</button>
-                        <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600" onclick="removeTask(this)">X</button>
+            const input = document.getElementById('taskInput');
+            const dueDate = document.getElementById('dueDate');
+            const priority = document.getElementById('priority');
+
+            if (input.value.trim() === '') {
+                alert('Please enter a task description!');
+                return;
+            }
+
+            const task = {
+                id: Date.now(),
+                text: input.value,
+                completed: false,
+                dueDate: dueDate.value,
+                priority: priority.value,
+                createdAt: new Date().toISOString()
+            };
+
+            tasks.push(task);
+            saveTasks();
+            renderTasks();
+            input.value = '';
+            dueDate.value = '';
+        }
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            tasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `task-item priority-${task.priority}${task.completed ? ' completed' : ''}`;
+                
+                taskElement.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id})">
+                    <div style="flex-grow: 1; margin: 0 1rem;">
+                        <div>${task.text}</div>
+                        <small>Due: ${task.dueDate || 'No date set'}</small>
+                    </div>
+                    <div class="task-actions">
+                        <button onclick="editTask(${task.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 `;
-                taskList.appendChild(li);
-                taskInput.value = "";
+
+                taskList.appendChild(taskElement);
+            });
+
+            updateStats();
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                saveTasks();
+                renderTasks();
             }
         }
 
-        function removeTask(button) {
-            let taskText = button.parentElement.parentElement.querySelector("span").textContent;
-            logHistory(`Deleted: ${taskText}`);
-            button.parentElement.parentElement.remove();
+        function deleteTask(id) {
+            tasks = tasks.filter(task => task.id !== id);
+            saveTasks();
+            renderTasks();
         }
 
-        function markDone(button) {
-            let taskText = button.parentElement.parentElement.querySelector("span");
-            taskText.classList.toggle("line-through");
-            taskText.classList.toggle("text-gray-500");
-            logHistory(`Completed: ${taskText.textContent}`);
-        }
-
-        function editTask(button) {
-            let taskText = button.parentElement.parentElement.querySelector("span");
-            let newText = prompt("Edit your task:", taskText.textContent);
-            if (newText !== null && newText.trim() !== "") {
-                taskText.textContent = newText;
+        function editTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                const newText = prompt('Edit task:', task.text);
+                if (newText && newText.trim()) {
+                    task.text = newText;
+                    saveTasks();
+                    renderTasks();
+                }
             }
         }
 
-        function clearAllTasks() {
-            document.getElementById("taskList").innerHTML = "";
-            logHistory("Cleared all tasks");
+        function filterTasks(status) {
+            const filteredTasks = status === 'all' ? tasks :
+                status === 'active' ? tasks.filter(task => !task.completed) :
+                tasks.filter(task => task.completed);
+            
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            filteredTasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `task-item priority-${task.priority}${task.completed ? ' completed' : ''}`;
+                
+                taskElement.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id})">
+                    <div style="flex-grow: 1; margin: 0 1rem;">
+                        <div>${task.text}</div>
+                        <small>Due: ${task.dueDate || 'No date set'}</small>
+                    </div>
+                    <div class="task-actions">
+                        <button onclick="editTask(${task.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                taskList.appendChild(taskElement);
+            });
+            updateStats();
         }
 
-        function logHistory(action) {
-            let taskHistory = document.getElementById("taskHistory");
-            let li = document.createElement("li");
-            li.classList.add("history-item", "text-gray-600", "text-sm", "mb-1");
-            li.textContent = action;
-            taskHistory.appendChild(li);
+        function sortTasks(criterion) {
+            if (criterion === 'date') {
+                tasks.sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+            } else if (criterion === 'priority') {
+                const priorityOrder = ['high', 'medium', 'low'];
+                tasks.sort((a, b) => priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority));
+            }
+            saveTasks();
+            renderTasks();
         }
+
+        function searchTasks() {
+            const query = document.getElementById('searchTask').value.toLowerCase();
+            const filteredTasks = tasks.filter(task => task.text.toLowerCase().includes(query));
+            
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+
+            filteredTasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = `task-item priority-${task.priority}${task.completed ? ' completed' : ''}`;
+                
+                taskElement.innerHTML = `
+                    <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                           onchange="toggleTask(${task.id})">
+                    <div style="flex-grow: 1; margin: 0 1rem;">
+                        <div>${task.text}</div>
+                        <small>Due: ${task.dueDate || 'No date set'}</small>
+                    </div>
+                    <div class="task-actions">
+                        <button onclick="editTask(${task.id})">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button onclick="deleteTask(${task.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                taskList.appendChild(taskElement);
+            });
+        }
+
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        document.getElementById('searchTask').addEventListener('input', searchTasks);
+
+        renderTasks();
     </script>
 </body>
 </html>
