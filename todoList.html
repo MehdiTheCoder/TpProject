@@ -4,95 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do List</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        input {
-            width: 70%;
-            padding: 8px;
-        }
-        button {
-            padding: 8px 15px;
-            margin: 5px;
-            cursor: pointer;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            background: #f4f4f4;
-            margin: 5px 0;
-            padding: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .done {
-            text-decoration: line-through;
-            color: gray;
-        }
-        .delete-btn {
-            background: red;
-            color: white;
-            border: none;
-            padding: 5px;
-            cursor: pointer;
-        }
-        .edit-btn {
-            background: orange;
-            color: white;
-            border: none;
-            padding: 5px;
-            cursor: pointer;
-        }
-        .done-btn {
-            background: green;
-            color: white;
-            border: none;
-            padding: 5px;
-            cursor: pointer;
-        }
-        .history-container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            overflow-y: scroll;
-            height: 150px;
-        }
-        .history-item {
-            font-size: 14px;
-            color: gray;
-            margin: 5px 0;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <h2>To-Do List</h2>
-        <input type="text" id="taskInput" placeholder="Enter a task">
-        <button onclick="addTask()">Add</button>
-        <button onclick="clearAllTasks()">Clear All</button>
-        <ul id="taskList"></ul>
-    </div>
-    <div class="history-container">
-        <h3>Task History</h3>
-        <ul id="taskHistory"></ul>
+<body class="bg-gradient-to-r from-green-400 to-blue-500 flex items-center justify-center min-h-screen">
+    <div class="container mx-auto p-6 bg-white rounded-lg shadow-2xl">
+        <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">To-Do List</h2>
+        <div class="flex mb-6">
+            <input type="text" id="taskInput" class="flex-grow p-3 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter a task">
+            <button onclick="addTask()" class="bg-blue-600 text-white px-6 py-3 rounded-r-lg hover:bg-blue-700">Add</button>
+            <button onclick="clearAllTasks()" class="bg-red-600 text-white px-6 py-3 rounded-lg ml-4 hover:bg-red-700">Clear All</button>
+        </div>
+        <ul id="taskList" class="list-none p-0 mb-6"></ul>
+        <div class="bg-gray-100 p-4 rounded-lg shadow-inner overflow-y-auto h-40">
+            <h3 class="text-xl font-bold mb-4 text-center text-gray-700">Task History</h3>
+            <ul id="taskHistory" class="list-none p-0"></ul>
+        </div>
     </div>
     <script>
         function addTask() {
@@ -101,11 +27,14 @@
             let taskText = taskInput.value.trim();
             if (taskText !== "") {
                 let li = document.createElement("li");
+                li.classList.add("flex", "justify-between", "items-center", "bg-gray-200", "p-3", "mb-2", "rounded-lg", "shadow-sm");
                 li.innerHTML = `
-                    <span>${taskText}</span>
-                    <button class="done-btn" onclick="markDone(this)">✔</button>
-                    <button class="edit-btn" onclick="editTask(this)">✏</button>
-                    <button class="delete-btn" onclick="removeTask(this)">X</button>
+                    <span class="flex-grow">${taskText}</span>
+                    <div class="flex space-x-2">
+                        <button class="done-btn bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600" onclick="markDone(this)">✔</button>
+                        <button class="edit-btn bg-yellow-500 text-white px-3 py-1 rounded-lg hover:bg-yellow-600" onclick="editTask(this)">✏</button>
+                        <button class="delete-btn bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600" onclick="removeTask(this)">X</button>
+                    </div>
                 `;
                 taskList.appendChild(li);
                 taskInput.value = "";
@@ -113,19 +42,20 @@
         }
 
         function removeTask(button) {
-            let taskText = button.parentElement.querySelector("span").textContent;
+            let taskText = button.parentElement.parentElement.querySelector("span").textContent;
             logHistory(`Deleted: ${taskText}`);
-            button.parentElement.remove();
+            button.parentElement.parentElement.remove();
         }
 
         function markDone(button) {
-            let taskText = button.parentElement.querySelector("span");
-            taskText.classList.toggle("done");
+            let taskText = button.parentElement.parentElement.querySelector("span");
+            taskText.classList.toggle("line-through");
+            taskText.classList.toggle("text-gray-500");
             logHistory(`Completed: ${taskText.textContent}`);
         }
 
         function editTask(button) {
-            let taskText = button.parentElement.querySelector("span");
+            let taskText = button.parentElement.parentElement.querySelector("span");
             let newText = prompt("Edit your task:", taskText.textContent);
             if (newText !== null && newText.trim() !== "") {
                 taskText.textContent = newText;
@@ -140,7 +70,7 @@
         function logHistory(action) {
             let taskHistory = document.getElementById("taskHistory");
             let li = document.createElement("li");
-            li.classList.add("history-item");
+            li.classList.add("history-item", "text-gray-600", "text-sm", "mb-1");
             li.textContent = action;
             taskHistory.appendChild(li);
         }
