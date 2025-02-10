@@ -7,44 +7,69 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
         .container {
-            max-width: 400px;
-            margin: auto;
+            background: #fff;
             padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
         }
-        input {
-            width: 70%;
-            padding: 8px;
+        h2 {
+            margin-top: 0;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
         }
         button {
-            padding: 8px 15px;
-            margin: 5px;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            background-color: #28a745;
+            color: white;
             cursor: pointer;
         }
+        button:hover {
+            background-color: #218838;
+        }
         ul {
-            list-style: none;
+            list-style-type: none;
             padding: 0;
         }
         li {
-            background: #f4f4f4;
-            margin: 5px 0;
-            padding: 8px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-bottom: 1px solid #ddd;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .delete-btn {
-            background: red;
-            color: white;
+        li.completed {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .delete-btn, .edit-btn, .complete-btn {
+            background: none;
             border: none;
-            padding: 5px;
             cursor: pointer;
+            color: #dc3545;
+        }
+        .edit-btn {
+            color: #ffc107;
+        }
+        .complete-btn {
+            color: #28a745;
         }
     </style>
 </head>
@@ -62,13 +87,35 @@
             let taskText = taskInput.value.trim();
             if (taskText !== "") {
                 let li = document.createElement("li");
-                li.innerHTML = taskText + ' <button class="delete-btn" onclick="removeTask(this)">X</button>';
+                li.innerHTML = `
+                    <span>${taskText}</span>
+                    <div>
+                        <button class="complete-btn" onclick="completeTask(this)">✔</button>
+                        <button class="edit-btn" onclick="editTask(this)">✎</button>
+                        <button class="delete-btn" onclick="removeTask(this)">X</button>
+                    </div>
+                `;
                 taskList.appendChild(li);
                 taskInput.value = "";
             }
         }
+
         function removeTask(button) {
-            button.parentElement.remove();
+            button.parentElement.parentElement.remove();
+        }
+
+        function completeTask(button) {
+            let li = button.parentElement.parentElement;
+            li.classList.toggle("completed");
+        }
+
+        function editTask(button) {
+            let li = button.parentElement.parentElement;
+            let span = li.querySelector("span");
+            let newTaskText = prompt("Edit task:", span.textContent);
+            if (newTaskText !== null && newTaskText.trim() !== "") {
+                span.textContent = newTaskText.trim();
+            }
         }
     </script>
 </body>
