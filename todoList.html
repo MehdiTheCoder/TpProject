@@ -39,12 +39,46 @@
             justify-content: space-between;
             align-items: center;
         }
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
         .delete-btn {
             background: red;
             color: white;
             border: none;
             padding: 5px;
             cursor: pointer;
+        }
+        .edit-btn {
+            background: orange;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .done-btn {
+            background: green;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+        .history-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            overflow-y: scroll;
+            height: 150px;
+        }
+        .history-item {
+            font-size: 14px;
+            color: gray;
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -53,7 +87,12 @@
         <h2>To-Do List</h2>
         <input type="text" id="taskInput" placeholder="Enter a task">
         <button onclick="addTask()">Add</button>
+        <button onclick="clearAllTasks()">Clear All</button>
         <ul id="taskList"></ul>
+    </div>
+    <div class="history-container">
+        <h3>Task History</h3>
+        <ul id="taskHistory"></ul>
     </div>
     <script>
         function addTask() {
@@ -62,13 +101,48 @@
             let taskText = taskInput.value.trim();
             if (taskText !== "") {
                 let li = document.createElement("li");
-                li.innerHTML = taskText + ' <button class="delete-btn" onclick="removeTask(this)">X</button>';
+                li.innerHTML = `
+                    <span>${taskText}</span>
+                    <button class="done-btn" onclick="markDone(this)">✔</button>
+                    <button class="edit-btn" onclick="editTask(this)">✏</button>
+                    <button class="delete-btn" onclick="removeTask(this)">X</button>
+                `;
                 taskList.appendChild(li);
                 taskInput.value = "";
             }
         }
+
         function removeTask(button) {
+            let taskText = button.parentElement.querySelector("span").textContent;
+            logHistory(`Deleted: ${taskText}`);
             button.parentElement.remove();
+        }
+
+        function markDone(button) {
+            let taskText = button.parentElement.querySelector("span");
+            taskText.classList.toggle("done");
+            logHistory(`Completed: ${taskText.textContent}`);
+        }
+
+        function editTask(button) {
+            let taskText = button.parentElement.querySelector("span");
+            let newText = prompt("Edit your task:", taskText.textContent);
+            if (newText !== null && newText.trim() !== "") {
+                taskText.textContent = newText;
+            }
+        }
+
+        function clearAllTasks() {
+            document.getElementById("taskList").innerHTML = "";
+            logHistory("Cleared all tasks");
+        }
+
+        function logHistory(action) {
+            let taskHistory = document.getElementById("taskHistory");
+            let li = document.createElement("li");
+            li.classList.add("history-item");
+            li.textContent = action;
+            taskHistory.appendChild(li);
         }
     </script>
 </body>
